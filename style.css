@@ -10,24 +10,69 @@ body {
   flex-direction: column;
 }
 
-/* container stable রাখবে */
 .container {
   width: 90%;
   max-width: 500px;
   text-align: center;
-  margin-bottom: 60px; /* footer space */
+  margin-bottom: 60px;
 }
 
-/* result box fixed feel দিবে */
+h1 {
+  color: #dc6f9f;
+}
+
+.search-box {
+  margin: 20px 0;
+}
+
+input {
+  padding: 10px;
+  width: 70%;
+  border: none;
+  border-radius: 5px;
+  outline: none;
+  font-size: 16px;
+  color: white;
+  background: #1e293b;
+}
+
+input::placeholder {
+  color: #aaa;
+}
+
+input:focus {
+  border: 1px solid #dc6f9f;
+  box-shadow: 0 0 10px #dc6f9f;
+}
+
+button {
+  padding: 10px;
+  border: none;
+  background: #dc6f9f;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #c85a89;
+}
+
 #movieResult {
   margin-top: 20px;
   background: #1e293b;
   padding: 15px;
   border-radius: 10px;
-  min-height: 100px; /* important fix */
+  min-height: 120px;
 }
 
-/* footer fix */
+img {
+  width: 100%;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+/* Footer animation */
 .footer {
   position: fixed;
   bottom: 10px;
@@ -35,6 +80,7 @@ body {
   text-align: center;
   font-size: 14px;
   color: #dc6f9f;
+  letter-spacing: 2px;
   animation: glow 2s infinite alternate;
 }
 
