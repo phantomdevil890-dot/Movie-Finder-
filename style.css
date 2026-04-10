@@ -5,22 +5,20 @@ body {
   color: white;
 }
 
-/* container full responsive */
+/* container */
 .container {
   width: 95%;
-  max-width: 600px;
+  max-width: 900px;
   margin: auto;
   text-align: center;
   padding-top: 20px;
 }
 
-/* title bigger */
 h1 {
   color: #dc6f9f;
-  font-size: 28px;
 }
 
-/* search box full width */
+/* search */
 .search-box {
   display: flex;
   gap: 10px;
@@ -30,7 +28,6 @@ h1 {
 input {
   flex: 1;
   padding: 12px;
-  font-size: 16px;
   border-radius: 8px;
   border: none;
   background: #1e293b;
@@ -38,32 +35,56 @@ input {
 }
 
 button {
-  padding: 12px 15px;
-  font-size: 16px;
+  padding: 12px;
+  border: none;
+  background: #dc6f9f;
+  color: white;
   border-radius: 8px;
 }
 
-/* result bigger */
-#movieResult {
-  margin-top: 20px;
+/* grid layout (Netflix style) */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 15px;
+}
+
+/* card */
+.card {
   background: #1e293b;
-  padding: 15px;
   border-radius: 10px;
+  overflow: hidden;
+  transition: 0.3s;
 }
 
-/* image responsive */
-img {
+.card:hover {
+  transform: scale(1.05);
+}
+
+/* image */
+.card img {
   width: 100%;
-  max-width: 250px;
-  border-radius: 10px;
-  margin-top: 10px;
+  height: 200px;
+  object-fit: cover;
 }
-@media (max-width: 480px) {
-  h1 {
-    font-size: 24px;
-  }
 
-  button {
-    padding: 10px;
-  }
+/* title */
+.card h3 {
+  font-size: 14px;
+  padding: 10px;
+}
+
+/* footer */
+.footer {
+  position: fixed;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  color: #dc6f9f;
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
