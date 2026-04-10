@@ -7,32 +7,42 @@ async function getWeather() {
   document.getElementById("weatherCard").classList.add("hidden");
 
   try {
-    // 1. Get latitude/longitude from city
-    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}`);
+    // 1. Get latitude & longitude (Open-Meteo geocoding)
+    const geoRes = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`
+    );
     const geoData = await geoRes.json();
 
-    if (!geoData.results) throw new Error("City not found");
+    if (!geoData.results || geoData.results.length === 0) {
+      throw new Error("City not found");
+    }
 
     const { latitude, longitude, name, country } = geoData.results[0];
 
-    // 2. Get weather (OpenWeather API)
-    const API_KEY = "d13b18bc552a46f7b5791716261004";
-
+    // 2. Get weather data (Open-Meteo)
     const weatherRes = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric`
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
     );
-
     const weatherData = await weatherRes.json();
 
-    document.getElementById("city").innerText = `${name}, ${country}`;
-    document.getElementById("temp").innerText = Math.round(weatherData.main.temp);
-    document.getElementById("condition").innerText = weatherData.weather[0].main;
-    document.getElementById("humidity").innerText = weatherData.main.humidity + "%";
-    document.getElementById("wind").innerText = weatherData.wind.speed;
+    const w = weatherData.current_weather;
 
-    const iconCode = weatherData.weather[0].icon;
+    document.getElementById("city").innerText = `${name}, ${country}`;
+    document.getElementById("temp").innerText = Math.round(w.temperature);
+    document.getElementById("wind").innerText = w.windspeed + " km/h";
+
+    // Open-Meteo has no icons → simple mapping
+    let condition = "Clear";
+    if (w.weathercode >= 45) condition = "Cloudy";
+    if (w.weathercode >= 51) condition = "Rainy";
+    if (w.weathercode >= 71) condition = "Snow";
+    if (w.weathercode >= 95) condition = "Storm";
+
+    document.getElementById("condition").innerText = condition;
+    document.getElementById("humidity").innerText = "N/A";
+
     document.getElementById("icon").src =
-      `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+      "https://cdn-icons-png.flaticon.com/512/1163/1163661.png";
 
     document.getElementById("loading").classList.add("hidden");
     document.getElementById("weatherCard").classList.remove("hidden");
