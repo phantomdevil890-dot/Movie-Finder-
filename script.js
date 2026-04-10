@@ -15,22 +15,24 @@ async function getWeather() {
 
     const { latitude, longitude, name, country } = geoData.results[0];
 
-    // 2. Get weather
+    // 2. Get weather (OpenWeather API)
+    const API_KEY = "d13b18bc552a46f7b5791716261004";
+
     const weatherRes = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
+      `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric`
     );
 
     const weatherData = await weatherRes.json();
-    const w = weatherData.current_weather;
 
     document.getElementById("city").innerText = `${name}, ${country}`;
-    document.getElementById("temp").innerText = Math.round(w.temperature);
-    document.getElementById("condition").innerText = "Weather updated";
-    document.getElementById("humidity").innerText = "N/A";
-    document.getElementById("wind").innerText = w.windspeed;
+    document.getElementById("temp").innerText = Math.round(weatherData.main.temp);
+    document.getElementById("condition").innerText = weatherData.weather[0].main;
+    document.getElementById("humidity").innerText = weatherData.main.humidity + "%";
+    document.getElementById("wind").innerText = weatherData.wind.speed;
 
+    const iconCode = weatherData.weather[0].icon;
     document.getElementById("icon").src =
-      "https://openweathermap.org/img/wn/01d@2x.png";
+      `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
 
     document.getElementById("loading").classList.add("hidden");
     document.getElementById("weatherCard").classList.remove("hidden");
