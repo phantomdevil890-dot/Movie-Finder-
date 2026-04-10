@@ -42,3 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+resultDiv.innerHTML = "<p>🔎 Searching...</p>";
+resultDiv.innerHTML = data.map(item => {
+  const show = item.show;
+  return `
+    <div style="margin-bottom:20px;">
+      <h3>${show.name}</h3>
+      <img src="${show.image ? show.image.medium : ''}">
+    </div>
+  `;
+}).join("");
