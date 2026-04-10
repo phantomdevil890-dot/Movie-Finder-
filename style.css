@@ -100,7 +100,4 @@ input {
   background: #1e293b;
   caret-color: #dc6f9f; /* cursor color */
 }
-#movieResult {
-  max-height: 300px;
-  overflow-y: auto;
-}
+
