@@ -88,3 +88,19 @@ img {
   0% { opacity: 0.4; transform: translateY(0px); }
   100% { opacity: 1; transform: translateY(-3px); }
 }
+.search-box {
+  position: sticky;
+  top: 0;
+  background: #0f172a;
+  padding: 10px 0;
+  z-index: 100;
+}
+input {
+  color: white;
+  background: #1e293b;
+  caret-color: #dc6f9f; /* cursor color */
+}
+#movieResult {
+  max-height: 300px;
+  overflow-y: auto;
+}
