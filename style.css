@@ -3,101 +3,67 @@ body {
   font-family: Arial, sans-serif;
   background: #0f172a;
   color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  flex-direction: column;
 }
 
+/* container full responsive */
 .container {
-  width: 90%;
-  max-width: 500px;
+  width: 95%;
+  max-width: 600px;
+  margin: auto;
   text-align: center;
-  margin-bottom: 60px;
+  padding-top: 20px;
 }
 
+/* title bigger */
 h1 {
   color: #dc6f9f;
+  font-size: 28px;
 }
 
+/* search box full width */
 .search-box {
+  display: flex;
+  gap: 10px;
   margin: 20px 0;
 }
 
 input {
-  padding: 10px;
-  width: 70%;
-  border: none;
-  border-radius: 5px;
-  outline: none;
+  flex: 1;
+  padding: 12px;
   font-size: 16px;
-  color: white;
+  border-radius: 8px;
+  border: none;
   background: #1e293b;
-}
-
-input::placeholder {
-  color: #aaa;
-}
-
-input:focus {
-  border: 1px solid #dc6f9f;
-  box-shadow: 0 0 10px #dc6f9f;
+  color: white;
 }
 
 button {
-  padding: 10px;
-  border: none;
-  background: #dc6f9f;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
+  padding: 12px 15px;
+  font-size: 16px;
+  border-radius: 8px;
 }
 
-button:hover {
-  background: #c85a89;
-}
-
+/* result bigger */
 #movieResult {
   margin-top: 20px;
   background: #1e293b;
   padding: 15px;
   border-radius: 10px;
-  min-height: 120px;
 }
 
+/* image responsive */
 img {
   width: 100%;
+  max-width: 250px;
   border-radius: 10px;
   margin-top: 10px;
 }
+@media (max-width: 480px) {
+  h1 {
+    font-size: 24px;
+  }
 
-/* Footer animation */
-.footer {
-  position: fixed;
-  bottom: 10px;
-  width: 100%;
-  text-align: center;
-  font-size: 14px;
-  color: #dc6f9f;
-  letter-spacing: 2px;
-  animation: glow 2s infinite alternate;
+  button {
+    padding: 10px;
+  }
 }
-
-@keyframes glow {
-  0% { opacity: 0.4; transform: translateY(0px); }
-  100% { opacity: 1; transform: translateY(-3px); }
-}
-.search-box {
-  position: sticky;
-  top: 0;
-  background: #0f172a;
-  padding: 10px 0;
-  z-index: 100;
-}
-input {
-  color: white;
-  background: #1e293b;
-  caret-color: #dc6f9f; /* cursor color */
-}
-
