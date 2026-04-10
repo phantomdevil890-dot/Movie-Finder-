@@ -9,17 +9,17 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   async function searchMovie() {
-    const movieName = input.value.trim();
+    const query = input.value.trim();
 
-    if (!movieName) {
-      resultDiv.innerHTML = "❌ Please enter a name";
+    if (!query) {
+      resultDiv.innerHTML = "❌ Type something";
       return;
     }
 
-    resultDiv.innerHTML = "⏳ Searching...";
+    resultDiv.innerHTML = "⏳ Loading...";
 
     try {
-      const res = await fetch(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(movieName)}`);
+      const res = await fetch(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(query)}`);
       const data = await res.json();
 
       if (data.length === 0) {
@@ -27,28 +27,18 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const show = data[0].show;
+      resultDiv.innerHTML = data.map(item => {
+        const show = item.show;
+        return `
+          <div class="card">
+            <img src="${show.image ? show.image.medium : ''}">
+            <h3>${show.name}</h3>
+          </div>
+        `;
+      }).join("");
 
-      resultDiv.innerHTML = `
-        <h2>${show.name}</h2>
-        <img src="${show.image ? show.image.medium : ''}">
-        <p><b>Language:</b> ${show.language}</p>
-        <p><b>Genres:</b> ${show.genres.join(", ")}</p>
-        <p><b>Rating:</b> ${show.rating.average || "N/A"}</p>
-        <p>${show.summary || "No summary available"}</p>
-      `;
     } catch (err) {
-      resultDiv.innerHTML = "⚠️ Error fetching data";
+      resultDiv.innerHTML = "⚠️ Error";
     }
   }
 });
-resultDiv.innerHTML = "<p>🔎 Searching...</p>";
-resultDiv.innerHTML = data.map(item => {
-  const show = item.show;
-  return `
-    <div style="margin-bottom:20px;">
-      <h3>${show.name}</h3>
-      <img src="${show.image ? show.image.medium : ''}">
-    </div>
-  `;
-}).join("");
