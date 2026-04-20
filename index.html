@@ -1,51 +1,727 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="bn">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Weather App</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Click Target V5 - Tamim Edition</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'></text></svg>">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0A0A0A;
+      color: #E8E8E8;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    h1 {
+      color: #7DF9FF;
+      text-shadow: 0 0 15px #1CA9C999;
+      margin: 8px;
+      font-size: 28px;
+      animation: titleGlow 3s infinite alternate;
+    }
+
+    @keyframes titleGlow {
+      from { text-shadow: 0 0 15px #1CA9C999; }
+      to { text-shadow: 0 0 30px #7DF9FF; }
+    }
+
+    .hud { max-width: 1200px; margin: 0 auto; padding: 0 10px; }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      font-size: 14px;
+      margin: 6px;
+      flex-wrap: wrap;
+    }
+
+    .stats span { font-weight: bold; }
+    #score { color: #7DF9FF; }
+    #time { color: #FF878D; }
+    #level { color: #7FFF00; }
+    #combo { color: #FFD700; }
+    #lives { color: #F64A8A; }
+    #rank { color: #BF5FFF; }
+
+    .controls { margin: 8px 0; }
+
+    .controls button, .controls select {
+      padding: 8px 16px;
+      font-size: 14px;
+      background: #1CA9C9;
+      border: none;
+      color: #0A0A0A;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 8px;
+      margin: 4px;
+      transition: 0.2s;
+    }
+
+    .controls button:hover {
+      background: #7DF9FF;
+      box-shadow: 0 0 20px #1CA9C999;
+    }
+
+    .controls button:disabled {
+      background: #333;
+      color: #666;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    #leaderboard {
+      font-size: 13px;
+      margin: 4px;
+      color: #FFD700;
+      font-weight: bold;
+    }
+
+    #message {
+      height: 18px;
+      color: #FFD700;
+      font-weight: bold;
+      text-shadow: 0 0 10px #FFD70099;
+      font-size: 14px;
+    }
+
+    #gameArea {
+      width: 96vw;
+      max-width: 1200px;
+      height: 62vh;
+      position: relative;
+      border: 3px solid #191970;
+      margin: 8px auto;
+      background: #111;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: none;
+    }
+
+    .target {
+      position: absolute;
+      cursor: none;
+      border-radius: 50%;
+      transition: 0.08s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 11px;
+      z-index: 5;
+    }
+
+    .normal { width: 38px; height: 38px; background: #FF007F; box-shadow: 0 0 20px #FF007F99; }
+    .golden { width: 38px; height: 38px; background: #FFD700; box-shadow: 0 0 30px #FFD700CC; animation: pulse 0.4s infinite alternate; }
+    .freeze { width: 38px; height: 38px; background: #1CA9C9; box-shadow: 0 0 20px #1CA9C999; }
+    .bomb { width: 38px; height: 38px; background: #FF1493; box-shadow: 0 0 20px #FF149399; }
+    .boss { width: 110px; height: 110px; background: #8B0000; box-shadow: 0 0 40px #FF0000CC; font-size: 16px; border: 3px solid #FF0000; }
+    .muzan { width: 140px; height: 140px; background: #000; box-shadow: 0 0 50px #8B0000CC; font-size: 14px; border: 4px solid #8B0000; }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.2); }
+    }
+
+    .target:active { transform: scale(0.7); }
+
+    .cursor {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 100;
+      transform: translate(-50%, -50%);
+      display: none;
+    }
+
+    .cursor.p1 { background: #1CA9C9; box-shadow: 0 0 15px #1CA9C9; }
+    .cursor.p2 { background: #FF1493; box-shadow: 0 0 15px #FF1493; }
+
+    .floating-text {
+      position: absolute;
+      font-weight: bold;
+      pointer-events: none;
+      animation: floatUp 0.7s forwards;
+      font-size: 16px;
+      z-index: 20;
+    }
+
+    @keyframes floatUp {
+      to { transform: translateY(-60px); opacity: 0; }
+    }
+
+    .particle {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: splash 0.5s forwards;
+      z-index: 15;
+    }
+
+    @keyframes splash {
+      to { transform: translate(var(--x), var(--y)); opacity: 0; }
+    }
+
+    .frozen { filter: brightness(0.4) blur(2px); }
+    .invasion { animation: redFlash 0.4s infinite; }
+    .castle { background: #0A0000; }
+
+    @keyframes redFlash {
+      0%, 100% { box-shadow: inset 0 0 0 1000px #FF000044; }
+      50% { box-shadow: inset 0 0 0 1000px #FF000077; }
+    }
+
+    #credit {
+      position: fixed;
+      bottom: 8px;
+      right: 12px;
+      color: #7DF9FF;
+      font-size: 13px;
+      text-shadow: 0 0 10px #1CA9C999;
+      font-weight: bold;
+      animation: creditGlow 2s infinite alternate;
+      z-index: 100;
+    }
+
+    #halloffame {
+      position: fixed;
+      bottom: 8px;
+      left: 12px;
+      color: #FFD700;
+      font-size: 12px;
+      text-shadow: 0 0 10px #FFD70099;
+      font-weight: bold;
+      z-index: 100;
+    }
+
+    @keyframes creditGlow {
+      from { opacity: 0.6; }
+      to { opacity: 1; text-shadow: 0 0 20px #7DF9FF; }
+    }
+
+    body.tamim #gameArea {
+      border-color: #FF1493;
+      box-shadow: 0 0 40px #FF149366;
+    }
+
+    body.tamim h1 {
+      color: #FF1493;
+      text-shadow: 0 0 20px #FF149399;
+    }
+
+    body.tamim #credit {
+      animation: tamimGlow 1s infinite alternate;
+    }
+
+    @keyframes tamimGlow {
+      from { color: #FF1493; text-shadow: 0 0 20px #FF1493; }
+      to { color: #FFD700; text-shadow: 0 0 30px #FFD700; }
+    }
+  </style>
 </head>
 <body>
+  <h1>Click The Target V5 – Tamim Edition </h1>
 
-  <div class="container">
-
-    <h1 class="title">Weather App</h1>
-
-    <div class="search-box">
-      <input type="text" id="cityInput" placeholder="Enter city name...">
-      <button onclick="getWeather()">Search</button>
+  <div class="hud">
+    <div class="stats">
+      <div>Score: <span id="score">0</span></div>
+      <div>Time: <span id="time">60</span>s</div>
+      <div>Level: <span id="level">1</span></div>
+      <div>Combo: <span id="combo">x1</span></div>
+      <div>Breath: <span id="lives"></span></div>
+      <div>Rank: <span id="rank">F</span></div>
     </div>
 
-    <button class="location-btn" onclick="getLocationWeather()">
-      📍 Use My Location
-    </button>
-
-    <div id="loading" class="loading hidden">Loading weather...</div>
-
-    <div id="error" class="error hidden"></div>
-
-    <div id="weatherCard" class="card hidden">
-      <img id="icon" src="" alt="weather icon">
-
-      <h2 id="city"></h2>
-
-      <p class="temp"><span id="temp"></span>°C</p>
-
-      <p id="condition"></p>
-
-      <div class="details">
-        <p>💧 Humidity: <span id="humidity"></span>%</p>
-        <p>🌬 Wind: <span id="wind"></span> km/h</p>
-      </div>
+    <div class="controls">
+      <button id="startBtn">Start Breathing</button>
+      <button id="ultBtn" disabled>ULT [SPACE]</button>
+      <select id="modeSelect">
+        <option value="solo">Solo Mode</option>
+        <option value="tamim">Tamim Mode </option>
+        <option value="multi">Local Co-op [WASD + Arrows]</option>
+      </select>
     </div>
 
-    <footer>
-      MADE BY TAMIM
-    </footer>
-
+    <div id="leaderboard">
+       Record: <span id="highscore">4000</span> by LEGEND
+    </div>
+    <div id="message"></div>
   </div>
 
-  <script src="script.js"></script>
+  <div id="gameArea">
+    <div id="p1Cursor" class="cursor p1"></div>
+    <div id="p2Cursor" class="cursor p2"></div>
+  </div>
+
+  <div id="credit">MADE BY TAMIM</div>
+  <div id="halloffame">HALL OF FAME: 4000 - UNDEFEATED</div>
+
+  <script>
+    let score = 0, timeLeft = 60, level = 1, combo = 1, lives = 3;
+    let gameRunning = false, timer, targetTimeout, frozen = false;
+    let lastHitTime = 0, ultReady = false, bossHits = 0, bossActive = false;
+    let invasionActive = false, invasionKills = 0, muzanPhase = false;
+    let gameMode = 'solo', tamimBonus = false;
+    let p1Score = 0, p2Score = 0;
+    let p1Pos = {x: 100, y: 100}, p2Pos = {x: 200, y: 200};
+    let keys = {};
+
+    const gameArea = document.getElementById('gameArea');
+    const scoreText = document.getElementById('score');
+    const timeText = document.getElementById('time');
+    const levelText = document.getElementById('level');
+    const comboText = document.getElementById('combo');
+    const livesText = document.getElementById('lives');
+    const rankText = document.getElementById('rank');
+    const highText = document.getElementById('highscore');
+    const msgText = document.getElementById('message');
+    const startBtn = document.getElementById('startBtn');
+    const ultBtn = document.getElementById('ultBtn');
+    const modeSelect = document.getElementById('modeSelect');
+    const p1Cursor = document.getElementById('p1Cursor');
+    const p2Cursor = document.getElementById('p2Cursor');
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function beep(freq, dur, vol = 0.1) {
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + dur);
+      } catch(e) {}
+    }
+
+    highText.textContent = '4000';
+    updateLives();
+    updateRank();
+
+    function updateLives() {
+      livesText.textContent = ''.repeat(lives) + ''.repeat(Math.max(0, 3 - lives));
+    }
+
+    function updateRank() {
+      let currentScore = gameMode === 'multi' ? Math.max(p1Score, p2Score) : score;
+      if (currentScore >= 4000) rankText.textContent = 'HASHIRA++';
+      else if (currentScore >= 2000) rankText.textContent = 'HASHIRA';
+      else if (currentScore >= 1000) rankText.textContent = 'S';
+      else if (currentScore >= 500) rankText.textContent = 'A';
+      else if (currentScore >= 300) rankText.textContent = 'B';
+      else if (currentScore >= 150) rankText.textContent = 'C';
+      else if (currentScore >= 50) rankText.textContent = 'D';
+      else rankText.textContent = 'F';
+    }
+
+    function showMessage(text, dur = 2000) {
+      msgText.textContent = text;
+      setTimeout(() => msgText.textContent = '', dur);
+    }
+
+    function createParticles(x, y, color, count = 10) {
+      for(let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        p.style.background = color;
+        const angle = (Math.PI * 2 * i) / count;
+        const dist = 25 + Math.random() * 45;
+        p.style.setProperty('--x', Math.cos(angle) * dist + 'px');
+        p.style.setProperty('--y', Math.sin(angle) * dist + 'px');
+        gameArea.appendChild(p);
+        setTimeout(() => p.remove(), 500);
+      }
+    }
+
+    function showText(x, y, text, color) {
+      const div = document.createElement('div');
+      div.className = 'floating-text';
+      div.textContent = text;
+      div.style.left = x + 'px';
+      div.style.top = y + 'px';
+      div.style.color = color;
+      gameArea.appendChild(div);
+      setTimeout(() => div.remove(), 700);
+    }
+
+    function spawnTarget() {
+      if (!gameRunning) return;
+      
+      Array.from(gameArea.children).forEach(child => {
+        if (!child.classList.contains('cursor')) child.remove();
+      });
+
+      if (score >= 5000 && !muzanPhase && !bossActive) {
+        startMuzan();
+        return;
+      }
+
+      if (level % 4 === 0 && !invasionActive && !bossActive && Math.random() < 0.25) {
+        startInvasion();
+        return;
+      }
+
+      if (level % 3 === 0 && !bossActive && !invasionActive && !muzanPhase) {
+        bossActive = true;
+        bossHits = 0;
+        const boss = document.createElement('div');
+        boss.className = 'target boss';
+        boss.textContent = '3';
+        spawn(boss, 110);
+        showMessage('UPPER MOON APPEARED!');
+        return;
+      }
+
+      const rand = Math.random();
+      const target = document.createElement('div');
+      target.classList.add('target');
+
+      let goldenChance = tamimBonus ? 0.5 : 0.12;
+      if (ultReady) {
+        target.classList.add('golden');
+      } else if (rand < 0.06) {
+        target.classList.add('bomb');
+      } else if (rand < 0.15) {
+        target.classList.add('freeze');
+      } else if (rand < 0.15 + goldenChance) {
+        target.classList.add('golden');
+      } else {
+        target.classList.add('normal');
+      }
+
+      spawn(target, 38);
+    }
+
+    function startMuzan() {
+      muzanPhase = true;
+      bossActive = true;
+      bossHits = 0;
+      gameArea.classList.add('castle');
+      showMessage('MUZAN KIBUTSUJI - FINAL BATTLE!', 3000);
+      beep(80, 1, 0.2);
+      
+      const muzan = document.createElement('div');
+      muzan.className = 'target muzan';
+      muzan.textContent = 'MUZAN';
+      spawn(muzan, 140);
+    }
+
+    function startInvasion() {
+      invasionActive = true;
+      invasionKills = 0;
+      gameArea.classList.add('invasion');
+      showMessage('DEMON INVASION! Kill 10 in 5s!', 3000);
+      beep(150, 0.5, 0.15);
+
+      for(let i = 0; i < 6; i++) {
+        setTimeout(() => spawnInvasionTarget(), i * 150);
+      }
+
+      setTimeout(() => {
+        if (invasionKills < 10) {
+          lives = 0;
+          endGame();
+        } else {
+          invasionActive = false;
+          gameArea.classList.remove('invasion');
+          showMessage('INVASION CLEARED! +100 BONUS');
+          score += 100;
+          scoreText.textContent = score;
+          spawnTarget();
+        }
+      }, 5000);
+    }
+
+    function spawnInvasionTarget() {
+      if (!gameRunning || !invasionActive) return;
+      const target = document.createElement('div');
+      target.classList.add('target', 'normal');
+      target.style.background = '#8B0000';
+      const size = 32;
+      const maxX = gameArea.clientWidth - size;
+      const maxY = gameArea.clientHeight - size;
+      target.style.left = Math.floor(Math.random() * maxX) + 'px';
+      target.style.top = Math.floor(Math.random() * maxY) + 'px';
+      target.addEventListener('click', (e) => {
+        invasionKills++;
+        handleHit(e, target, true, 1);
+      });
+      gameArea.appendChild(target);
+    }
+
+    function spawn(target, size) {
+      const maxX = gameArea.clientWidth - size;
+      const maxY = gameArea.clientHeight - size;
+      target.style.left = Math.floor(Math.random() * maxX) + 'px';
+      target.style.top = Math.floor(Math.random() * maxY) + 'px';
+
+      target.addEventListener('click', (e) => handleHit(e, target, false, 1));
+      gameArea.appendChild(target);
+
+      let speed = Math.max(1100 - (level * 70), 300);
+      if (frozen) speed = 2200;
+      if (tamimBonus) speed *= 0.85;
+
+      targetTimeout = setTimeout(spawnTarget, speed);
+    }
+
+    function handleHit(e, target, isInvasion, player) {
+      if (!gameRunning) return;
+      e.stopPropagation();
+
+      const now = Date.now();
+      if (now - lastHitTime < 1300) combo++;
+      else combo = 1;
+      lastHitTime = now;
+      comboText.textContent = 'x' + combo;
+
+      let points = 1 * combo * level;
+      if (tamimBonus) points *= 2;
+      let color = '#7DF9FF';
+
+      const x = e.clientX - gameArea.offsetLeft;
+      const y = e.clientY - gameArea.offsetTop;
+
+      if (target.classList.contains('muzan')) {
+        bossHits++;
+        const hp = 20 - bossHits;
+        target.textContent = `HP:${hp}`;
+        createParticles(x, y, '#8B0000', 15);
+        beep(100, 0.1, 0.15);
+        if (bossHits >= 20) {
+          points = 1000;
+          showText(x, y, 'MUZAN DEFEATED! +1000', '#FFD700');
+          bossActive = false;
+          muzanPhase = false;
+          gameArea.classList.remove('castle');
+          beep(50, 1, 0.2);
+          setTimeout(() => endGame(true), 1000);
+        } else {
+          showText(x, y, `HIT! ${hp} left`, '#FF0000');
+          return;
+        }
+      } else if (target.classList.contains('boss')) {
+        bossHits++;
+        target.textContent = 3 - bossHits;
+        createParticles(x, y, '#FF0000', 12);
+        beep(200, 0.1);
+        if (bossHits >= 3) {
+          points = 50 * level;
+          showText(x, y, 'BOSS DOWN +' + points, '#FF0000');
+          bossActive = false;
+          beep(100, 0.3);
+        } else {
+          showText(x, y, 'HIT!', '#FF0000');
+          return;
+        }
+      } else if (target.classList.contains('golden')) {
+        points *= 5;
+        color = '#FFD700';
+        showText(x, y, 'GOLD +' + points, color);
+        beep(800, 0.08);
+      } else if (target.classList.contains('freeze')) {
+        frozen = true;
+        gameArea.classList.add('frozen');
+        showText(x, y, 'FREEZE!', '#1CA9C9');
+        beep(400, 0.15);
+        setTimeout(() => { frozen = false; gameArea.classList.remove('frozen'); }, 2000);
+      } else if (target.classList.contains('bomb')) {
+        lives--;
+        updateLives();
+        showText(x, y, 'BOMB!', '#FF1493');
+        beep(150, 0.2);
+        if (lives <= 0) return endGame(false);
+      } else {
+        showText(x, y, '+' + points, color);
+        beep(600, 0.04);
+      }
+
+      if (!target.classList.contains('bomb')) {
+        if (gameMode === 'multi') {
+          if (player === 1) p1Score += points;
+          else p2Score += points;
+          scoreText.textContent = `P1:${p1Score} P2:${p2Score}`;
+        } else {
+          score += points;
+          scoreText.textContent = score;
+        }
+        updateRank();
+        createParticles(x, y, color);
+      }
+
+      if (score >= 100 && !ultReady && gameMode !== 'multi') {
+        ultReady = true;
+        ultBtn.disabled = false;
+        showMessage('ULTIMATE READY!');
+      }
+
+      if (!isInvasion) {
+        clearTimeout(targetTimeout);
+        setTimeout(spawnTarget, 80);
+      } else {
+        target.remove();
+      }
+    }
+
+    function useUlt() {
+      if (!ultReady || !gameRunning || gameMode === 'multi') return;
+      ultReady = false;
+      ultBtn.disabled = true;
+      showMessage('TAMIM FINAL FORM!', 2000);
+      beep(1000, 0.4, 0.15);
+
+      const targets = gameArea.querySelectorAll('.target');
+      targets.forEach(t => {
+        if (!t.classList.contains('boss') && !t.classList.contains('muzan')) {
+          t.className = 'target golden';
+        }
+      });
+    }
+
+    function updateCursors() {
+      if (!gameRunning || gameMode !== 'multi') return;
+      
+      const speed = 8;
+      if (keys['w']) p1Pos.y = Math.max(10, p1Pos.y - speed);
+      if (keys['s']) p1Pos.y = Math.min(gameArea.clientHeight - 10, p1Pos.y + speed);
+      if (keys['a']) p1Pos.x = Math.max(10, p1Pos.x - speed);
+      if (keys['d']) p1Pos.x = Math.min(gameArea.clientWidth - 10, p1Pos.x + speed);
+      
+      if (keys['arrowup']) p2Pos.y = Math.max(10, p2Pos.y - speed);
+      if (keys['arrowdown']) p2Pos.y = Math.min(gameArea.clientHeight - 10, p2Pos.y + speed);
+      if (keys['arrowleft']) p2Pos.x = Math.max(10, p2Pos.x - speed);
+      if (keys['arrowright']) p2Pos.x = Math.min(gameArea.clientWidth - 10, p2Pos.x + speed);
+      
+      p1Cursor.style.left = p1Pos.x + 'px';
+      p1Cursor.style.top = p1Pos.y + 'px';
+      p2Cursor.style.left = p2Pos.x + 'px';
+      p2Cursor.style.top = p2Pos.y + 'px';
+      
+      requestAnimationFrame(updateCursors);
+    }
+
+    function startGame() {
+      score = 0; p1Score = 0; p2Score = 0; timeLeft = 60; level = 1; combo = 1; lives = 3;
+      ultReady = false; bossActive = false; frozen = false; invasionActive = false; muzanPhase = false;
+      gameMode = modeSelect.value;
+      tamimBonus = gameMode === 'tamim';
+      gameRunning = true;
+      
+      document.body.className = tamimBonus ? 'tamim' : '';
+      
+      scoreText.textContent = 0; timeText.textContent = 60;
+      levelText.textContent = 1; comboText.textContent = 'x1';
+      ultBtn.disabled = true;
+      updateLives(); updateRank();
+      startBtn.style.display = 'none';
+      modeSelect.disabled = true;
+      
+      if (gameMode === 'multi') {
+        p1Cursor.style.display = 'block';
+        p2Cursor.style.display = 'block';
+        showMessage('P1: WASD + F | P2: Arrows + Enter', 3000);
+        updateCursors();
+      } else {
+        p1Cursor.style.display = 'none';
+        p2Cursor.style.display = 'none';
+      }
+      
+      if (tamimBonus) showMessage('TAMIM MODE: 2X SCORE + 50% GOLD!', 3000);
+      
+      spawnTarget();
+      
+      timer = setInterval(() => {
+        timeLeft--;
+        timeText.textContent = timeLeft;
+        if (timeLeft % 5 === 0 && timeLeft !== 60) {
+          level++;
+          levelText.textContent = level;
+        }
+        if (timeLeft <= 0 || lives <= 0) endGame(false);
+      }, 1000);
+    }
+
+    function endGame(victory = false) {
+      gameRunning = false;
+      clearInterval(timer);
+      clearTimeout(targetTimeout);
+      Array.from(gameArea.children).forEach(child => {
+        if (!child.classList.contains('cursor')) child.remove();
+      });
+      gameArea.classList.remove('frozen', 'invasion', 'castle');
+      startBtn.style.display = 'inline-block';
+      startBtn.textContent = 'Play Again';
+      modeSelect.disabled = false;
+      p1Cursor.style.display = 'none';
+      p2Cursor.style.display = 'none';
+      
+      let finalScore = gameMode === 'multi' ? Math.max(p1Score, p2Score) : score;
+      let msg = victory ? `MUZAN DEFEATED!\n\n` : `Game Over!\n\n`;
+      msg += `Score: ${finalScore}\nRank: ${rankText.textContent}\nRecord: 4000\n\nMADE BY TAMIM`;
+      
+      if (gameMode === 'multi') {
+        msg = `P1: ${p1Score} | P2: ${p2Score}\n\n${msg}`;
+      }
+      
+      alert(msg);
+    }
+
+    gameArea.addEventListener('click', (e) => {
+      if (!gameRunning || gameMode === 'multi' || e.target.classList.contains('target')) return;
+      lives--;
+      combo = 1;
+      comboText.textContent = 'x1';
+      updateLives();
+      score = Math.max(0, score - 2);
+      scoreText.textContent = score;
+      showText(e.clientX - gameArea.offsetLeft, e.clientY - gameArea.offsetTop, 'MISS -2', '#FF878D');
+      beep(200, 0.1);
+      if (lives <= 0) endGame(false);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      keys[e.key.toLowerCase()] = true;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (gameMode !== 'multi') useUlt();
+      }
+      if (e.key.toLowerCase() === 'f' && gameMode === 'multi') {
+        const targets = document.elementsFromPoint(
+          gameArea.offsetLeft + p1Pos.x,
+          gameArea.offsetTop + p1Pos.y
+        );
+        const target = targets.find(el => el.classList.contains('target'));
+        if (target) target.click();
+      }
+      if (e.key === 'Enter' && gameMode === 'multi') {
+        const targets = document.elementsFromPoint(
+          gameArea.offsetLeft + p2Pos.x,
+          gameArea.offsetTop + p2Pos.y
+        );
+        const target = targets.find(el => el.classList.contains('target'));
+        if (target) target.click();
+      }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      keys[e.key.toLowerCase()] = false;
+    });
+
+    startBtn.addEventListener('click', startGame);
+    ultBtn.addEventListener('click', useUlt);
+  </script>
 </body>
 </html>
